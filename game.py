@@ -12,6 +12,9 @@ pygame.init()
 white = (255, 255, 255)
 red = (255, 0, 0)
 black = (0, 0, 0)
+blue = (11, 100, 255)
+light_blue = (26, 109, 255)
+light_yellow = (244, 251, 15)
 
 # Creating window
 screen_width = 900
@@ -19,15 +22,18 @@ screen_height = 600
 gameWindow = pygame.display.set_mode((screen_width, screen_height))
 
 #Background Image
-game_over = pygame.image.load("game_over.jpg")
-bgimg = pygame.image.load("bg.jpg")
+
+start_img = pygame.image.load("start_screen.jpg")
+start_img = pygame.transform.scale(start_img, (screen_width, screen_height)) 
+
+game_over_img = pygame.image.load("game_over.jpg")
+game_over_img = pygame.transform.scale(game_over_img, (screen_width, screen_height)) 
+
+bgimg = pygame.image.load("bg2.jpg")
+bgimg = pygame.transform.scale(bgimg, (screen_width, screen_height))
 
 bgimg = pygame.transform.scale(bgimg, (screen_width, screen_height)).convert_alpha() 
-game_over = pygame.transform.scale(game_over, (screen_width, screen_height)).convert_alpha() 
-
-# welcome = pygame.image.load("welcome2.jpg")
-# welcome = pygame.transform.scale(welcome, (screen_width, screen_height)).convert_alpha()
-
+game_over = pygame.transform.scale(game_over_img, (screen_width, screen_height)).convert_alpha() 
 
 # Game Title
 pygame.display.set_caption("SnakeClub Made By Ashutosh")
@@ -49,20 +55,21 @@ def welcome():
     exit_game = False
     while not exit_game:
         gameWindow.fill((233,210,229))
-        text_screen("Welcome to Snakes", black, 260, 250)
-        text_screen("Press Space Bar To Play", black, 232, 290)
 
+        gameWindow.blit(start_img, (0, 0))
+        text_screen("Welcome to Snakes", white, 260, 250)
+        text_screen("Press Any Key To Play", white, 232, 290)
 
-
-        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit_game = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    # pygame.mixer.music.load('back.mp3')
-                    # pygame.mixer.music.play()
-                    gameloop()
+            elif event.type == pygame.KEYDOWN:
+                gameloop()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                gameloop()
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                gameloop()
 
         pygame.display.update()
         clock.tick(60)
@@ -79,16 +86,33 @@ def gameloop():
     velocity_y = 0
     snk_list = []
     snk_length = 1
+    difference = 15
+
     # Check if hiscore file exists
     if(not os.path.exists("hiscore.txt")):
         with open("hiscore.txt", "w") as f:
             f.write("0")
-
     with open("hiscore.txt", "r") as f:
-        hiscore = f.read()
 
-    food_x = random.randint(0, screen_width)
-    food_y = random.randint(0, screen_height)
+        hiscore = f.read()
+        try:
+            hiscore = int(hiscore)
+        except Exception as e:
+            print(f"The error is {e}")
+            with open("hiscore.txt", "w") as f:
+                hiscore = 0
+                f.write(str(hiscore))
+
+        # validate hiscore
+        # print(isinstance(hiscore, int))
+
+        if not isinstance(hiscore, int):
+            with open("hiscore.txt", "w") as f:
+                hiscore = 0
+                f.write(str(hiscore))
+
+    food_x = random.randint(0, screen_width /2)
+    food_y = random.randint(0, screen_height - 100)
     score = 0
     init_velocity = 5
     snake_size = 30
@@ -98,8 +122,10 @@ def gameloop():
             with open("hiscore.txt", "w") as f:
                 f.write(str(hiscore))
             gameWindow.fill(white) 
-            gameWindow.blit(game_over, (0, 0))
-            text_screen("Game Over! Press Enter To Continue", red, 100, 250)
+            gameWindow.blit(game_over_img, (0, 0))
+            text_screen("Game Over! Press Any To Continue", light_blue, 120, 400)
+            text_screen("Made By Ashutosh", light_yellow, screen_width / 2 - 150, 450)
+
 
             pygame.display.update() 
 
@@ -109,8 +135,14 @@ def gameloop():
                     exit_game = True
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        welcome()
+                    gameloop()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    gameloop()
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    gameloop()
+                        
 
         else:
 
@@ -119,6 +151,8 @@ def gameloop():
                     exit_game = True
 
                 if event.type == pygame.KEYDOWN:
+                    init_velocity = init_velocity + 0.1
+                    print(f"\n  The Current speed is {init_velocity}  \n")
                     if event.key == pygame.K_d:
                         velocity_x = init_velocity
                         velocity_y = 0
